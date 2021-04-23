@@ -1,65 +1,114 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from 'next/head';
+import styled, { createGlobalStyle } from 'styled-components';
+import { useState, useEffect} from 'react'
+import { normalize } from 'styled-normalize'
+import Newsletter from '../components/Newsletter'
+
+
+// const StyledSimpleForm = styled(Mailchimp)`
+//     margin-top: 120px;
+//     button {
+//       border: none;
+//       background-color: red;
+
+//     }
+//     div {
+//       padding: 10px
+//     }
+// `;
+
+const GlobalStyle = createGlobalStyle`
+  ${normalize}
+
+  body {
+    background-color: #000000;
+    color: #FFFFFF;
+    font-family: 'Courier New', Courier, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    font-size: 2rem;
+  }
+`;
+
+const Container = styled.main`
+  text-align: center;
+	width: 100vw;
+	height: 600px;	
+	position: absolute;
+	top:0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+  	margin: auto;
+`;
+
+const Vertical = styled.div`
+    margin: 20px auto;
+    border-left: 2px solid white;
+    width: 1px;
+    height: ${props => props.height};
+    text-align: center;
+`;
+
+const Text = styled.div`
+`
 
 export default function Home() {
+ const calculateTimeLeft = () => {
+    let year = new Date().getFullYear();
+    const difference = +new Date(`${year}-07-31`) - +new Date();
+    let timeLeft = {};
+
+    if (difference > 0) {
+      timeLeft = {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    }
+
+    return timeLeft;
+  };
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [year] = useState(new Date().getFullYear());
+
+  useEffect(() => {
+    setTimeout(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+  });
+
+  const timerComponents = [];
+
+  Object.keys(timeLeft).forEach((interval, index) => {
+    if (!timeLeft[interval]) {
+      return;
+    }
+
+    timerComponents.push(
+      <span key={index}>
+        {(timeLeft[interval]).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}{interval==="seconds" ? "" : ":"}
+      </span>
+    );
+  });
+
+
   return (
-    <div className={styles.container}>
+    <>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Capturing a PM - A film by Gary ...</title>
       </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+      <Container>
+        <GlobalStyle />
+        <Text>Counting down.</Text>
+        <Vertical height="160px"/>
+         {timerComponents.length ? timerComponents : <span>Time's up!</span>} 
+        <Vertical height="160px"/>
+        <Text>31-07-2021</Text>
+        <Newsletter />
+      </Container>
+    </>
+  );
 }
